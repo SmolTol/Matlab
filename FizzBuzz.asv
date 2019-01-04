@@ -1,0 +1,19 @@
+% FizzBuzz in Matlab
+
+startingPoint = -15;
+endPoint = 15;
+
+
+%%%%%%%%%%%%
+% FizzBuzzer function
+%%%%%%%%%%%%
+
+function FizzBuzzer(strtPoint, endPoint)
+% Cycles through a range defined by two integers,
+% prints FIZZ for multiples of three, BUZZ for multiples of five,
+% and FIZZBUZZ for multiples of both. Returns nothing useful
+
+fo
+
+
+end
