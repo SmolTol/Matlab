@@ -8,7 +8,7 @@
             app.BB1Tara = bb1.GetBalanceBoardSensorState();
             app.BB2 = bb2;
             app.BB2Tara = bb2.GetBalanceBoardSensorState();
-            end%
+            %
 %Left platform%
 F1 = 8.8;
 F2 = 20.4;
@@ -75,5 +75,5 @@ COGz = (Fyl+Fyr)/((Fyl*COPLz)+(Fyr*COPRz))
 
 header = {'Time','LLT','LLB','LRT','LRB','RLT','RLB','RRT','RRB','COPLx','COPLz','COPRx','COPRz','COGx','COGz'}
 xlswrite ('Testcod',header,'Sheet1')
-for  %BB is recording?%
+%for  %BB is recording?
     

@@ -82,7 +82,11 @@ vectorOfResults = [0, LPLT,LPLB,LPRT,LPRB,RPLT, RPLB, RPRT, RPRB,CoPLeftX,...
 CoPLeftZ,CoPRightX, CoPRightZ, CoGx, CoGz];
 xlswrite('dataAnalyzerSheet.xlsx',vectorOfResults,'A2:O2');
 
-xlswrite('dataAnalyzerSheet.xlsx',1,'J3:O120');
+for n = 3:120
+    xlswrite('dataAnalyzerSheet.xlsx',
+    
+    
+end
 
 winopen('dataAnalyzerSheet.xlsx')
 
@@ -90,19 +94,16 @@ winopen('dataAnalyzerSheet.xlsx')
 %Plotting
 %%%%%%%%%%%%%%%%%%
 dataFromColumns = xlsread("dataAnalyzerSheet.xlsx" , "J2:O121");
-COPLeftx = dataFromColumns(1:119,1);
-COPLeftz = dataFromColumns(1:119,2);
-COPRightx = dataFromColumns(1:119,3);
-COPRightz = dataFromColumns(1:119,4);
-COGravx = dataFromColumns(1:119,5);
-COGravz = dataFromColumns(1:119,6);
+COPLeftx = dataFromColumns(1:120,1);
+COPLeftz = dataFromColumns(1:120,2);
+COPRightx = dataFromColumns(1:120,3);
+COPRightz = dataFromColumns(1:120,4);
+COGravx = dataFromColumns(1:120,5);
+COGravz = dataFromColumns(1:120,6);
 
-figure(1)
-plot(COPLeftx,COPLeftz, ':r')
-figure(2)
-plot(COPRightx,COPRightz, '--xg' )
-figure(3)
-plot(COGravx,COGravz, '-o')
+plot(COPLeftx,COPLeftz,scatter)
+plot(COPRightx,COPRightz,scatter)
+plot(COGravx,COGravz,scatter)
 
 %%%%%%%%%%%%%%%%%%
 %Statistical analysis

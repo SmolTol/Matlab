@@ -1,6 +1,7 @@
 % Cleans workspace
 clc; clear all; close all;
 
+
 % Analyzes data from the WiiBoard
 % Gets: Weight data from WiiBoard
 %       Format: Eight unsigned ints from 0 to 150
@@ -32,6 +33,7 @@ halfOfBoardWidth = 238/2;
 distanceBetweenPlatforms = 77;
 PlatformOffset = 157.5; % Distance from Total center to platform center (mm)
 
+
 %%%%%%%%%%%%%%%%%%
 % Test parameters:
 % Mock data to be replaced with actual sensor
@@ -50,6 +52,7 @@ RPLT = 6.5;
 RPLB = 12.7;
 RPRT = 5.2;
 RPRB = 10.2;
+
 
 %%%%%%%%%%%%%%%%%%
 % Do the math
@@ -70,6 +73,7 @@ RPRB = 10.2;
 [CoGx, CoGz] = centerOfGravity(LPLT, LPLB, LPRT, LPRB,RPLT, RPLB, RPRT,...
     RPRB, CoPLeftX, CoPLeftZ, CoPRightX, CoPRightZ, PlatformOffset)
 
+
 %%%%%%%%%%%%%%%%%%
 % Write data in Excel and open the file
 %%%%%%%%%%%%%%%%%%
@@ -82,31 +86,32 @@ vectorOfResults = [0, LPLT,LPLB,LPRT,LPRB,RPLT, RPLB, RPRT, RPRB,CoPLeftX,...
 CoPLeftZ,CoPRightX, CoPRightZ, CoGx, CoGz];
 xlswrite('dataAnalyzerSheet.xlsx',vectorOfResults,'A2:O2');
 
-xlswrite('dataAnalyzerSheet.xlsx',1,'J3:O120');
-
 winopen('dataAnalyzerSheet.xlsx')
 
-%%%%%%%%%%%%%%%%%%
-%Plotting
-%%%%%%%%%%%%%%%%%%
-dataFromColumns = xlsread("dataAnalyzerSheet.xlsx" , "J2:O121");
-COPLeftx = dataFromColumns(1:119,1);
-COPLeftz = dataFromColumns(1:119,2);
-COPRightx = dataFromColumns(1:119,3);
-COPRightz = dataFromColumns(1:119,4);
-COGravx = dataFromColumns(1:119,5);
-COGravz = dataFromColumns(1:119,6);
 
-figure(1)
-plot(COPLeftx,COPLeftz, ':r')
-figure(2)
-plot(COPRightx,COPRightz, '--xg' )
-figure(3)
-plot(COGravx,COGravz, '-o')
+%%%%%%%%%%%%%%%%%%
+%Set up Matrix of results
+%%%%%%%%%%%%%%%%%%
+
+numberOfCycles = 120;
+matrixOfResults = zeros(numberOfCycles,length(vectorOfResults));
+
+for n = 1:numberOfCycles
+   matrixOfResults(n,1:length(vectorOfResults)) = vectorOfResults;
+    
+end
+
 
 %%%%%%%%%%%%%%%%%%
 %Statistical analysis
 %%%%%%%%%%%%%%%%%%
+
+for n = 1:length(vectorOfResults)
+   vectorOfMeans(n) = mean(matrixOfResults(1:numberOfCycles, n)); 
+   vectorOfMedian(n) = median(matrixOfResults(1:numberOfCycles, n)); 
+   vectorOfStandardDeviation(n) = std(matrixOfResults(1:numberOfCycles, n)); 
+end
+
 
 %%%%%%%%%%%%%%%%%%
 % Function definitions
