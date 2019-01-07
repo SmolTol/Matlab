@@ -86,10 +86,10 @@ winopen('dataAnalyzerSheet.xlsx')
 
 
 numberOfCycles = 120;
-matrixOfResults = zeros(numberOfCycles,length(vectorOfResults));
+matrixOfResults = zeros(numberOfCycles,length(vectorOfResults))
 
 for n = 1:numberOfCycles
-   matrixOfResults(n,1:length(vectorOfResults)) = vectorOfResults;
+   matrixOfResults(n,1:length(vectorOfResults)) = vectorOfResults
     
 end
 

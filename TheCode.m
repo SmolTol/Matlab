@@ -86,25 +86,21 @@ winopen('dataAnalyzerSheet.xlsx')
 
 
 numberOfCycles = 120;
-matrixOfResults = zeros(numberOfCycles,length(vectorOfResults));
+matrixOfResults = zeros(numberOfCycles,length(vectorOfResults))
 
 for n = 1:numberOfCycles
-   matrixOfResults(n,1:length(vectorOfResults)) = vectorOfResults;
+   matrixOfResults(n,1:length(vectorOfResults)) = vectorOfResults
     
 end
 
 %%%%%%%%%%%%%%%%%%
+%Plotting
+%%%%%%%%%%%%%%%%%%
+dataFromColumns = xlsread(dataAnalyzerSheet.xls,1,J2:J121);
+
+%%%%%%%%%%%%%%%%%%
 %Statistical analysis
 %%%%%%%%%%%%%%%%%%
-
-for n = 1:length(vectorOfResults)
-   vectorOfMeans(n) = mean(matrixOfResults(1:numberOfCycles, n)); 
-   vectorOfMedian(n) = median(matrixOfResults(1:numberOfCycles, n)); 
-   vectorOfStandardDeviation(n) = std(matrixOfResults(1:numberOfCycles, n)); 
-end
-
-
-
 
 %%%%%%%%%%%%%%%%%%
 % Function definitions
