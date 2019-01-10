@@ -55,19 +55,19 @@ RPRB = 10.2;
 % Do the math
 %%%%%%%%%%%%%%%%%%
 % Center of pressure Left Board
-[CoPLeftX, CoPLeftZ] = centerOfPressure(LPLT, LPLB, LPRT, LPRB, ...
+[CoPLeftX, CoPLeftZ] = centerOfPressureLeft(LPRB, LPRT, LPLB, LPLT, ...
     halfOfBoardLength, halfOfBoardWidth)
 
 % Center of pressure on Right Board
-[CoPRightX, CoPRightZ] = centerOfPressure(RPLT, RPLB, RPRT, RPRB, ...
+[CoPRightX, CoPRightZ] = centerOfPressureRight(RPLT, RPLB, RPRT, RPRB, ...
     halfOfBoardLength, halfOfBoardWidth)
 
 % Center of pressure Total
-[CoPTotalx, CoPTotalZ] = centerOfPressure(LPLT, LPLB, RPRT, RPRB, ...
-    halfOfBoardLength, (2*halfOfBoardWidth + distanceBetweenPlatforms/2))
+%[CoPTotalx, CoPTotalZ] = centerOfPressure(LPLT, LPLB, RPRT, RPRB, ...
+    %halfOfBoardLength, (2*halfOfBoardWidth + distanceBetweenPlatforms/2))
 
 % Center of gravity total
-[CoGx, CoGz] = centerOfGravity(LPLT, LPLB, LPRT, LPRB,RPLT, RPLB, RPRT,...
+[CoGx, CoGz] = centerOfGravity(LPRB, LPRT, LPLB, LPLT ,RPLT, RPLB, RPRT,...
     RPRB, CoPLeftX, CoPLeftZ, CoPRightX, CoPRightZ, PlatformOffset)
 
 %%%%%%%%%%%%%%%%%%
@@ -99,10 +99,39 @@ COGravz = dataFromColumns(1:119,6);
 
 figure(1)
 plot(COPLeftx,COPLeftz, ':r')
+xlabel('X [mm]');
+ylabel('Z [mm]');
+xlim([-120 120]);
+ylim([-220 220]);
+grid on
+grid minor
+ax.XTick = [-120:10:120];
+ax.YTick = [-220:10:220];
+title('Center of Pressure Left')
+
 figure(2)
 plot(COPRightx,COPRightz, '--xg' )
+xlabel('X [mm]');
+ylabel('Z [mm]');
+xlim([-120 120]);
+ylim([-220 220]);
+grid on
+grid minor
+ax.XTick = [-120:10:120];
+ax.YTick = [-220:10:220];
+title('Center of Pressure Right')
+
 figure(3)
 plot(COGravx,COGravz, '-o')
+xlabel('X [mm]');
+ylabel('Z [mm]');
+xlim([-242 242]);
+ylim([-220 220]);
+grid on
+grid minor
+ax.XTick = [-242:10:242];
+ax.YTick = [-220:10:220];
+title('Center of Gravity')
 
 %%%%%%%%%%%%%%%%%%
 %Statistical analysis
@@ -111,22 +140,37 @@ plot(COGravx,COGravz, '-o')
 %%%%%%%%%%%%%%%%%%
 % Function definitions
 %%%%%%%%%%%%%%%%%%
-function [COPx,COPz] = centerOfPressure(s1, s2, s3, s4, BParam1, BParam2)
-% Calculates center of pressre.
+function [COPLx,COPLz] = centerOfPressureLeft(s1, s2, s3, s4, BParam1, BParam2)
+% Calculates center of pressre of the Left Platform.
 % Accepts data from four sensors and board parameters,  
 % returns center of pressure X and center of pressure Z
-ftotal = s1 + s2 + s3 + s4; % Total force
+FLtotal = s1 + s2 + s3 + s4; % Total force
 
-momentOfInertiaX = BParam1 * (s1-s2+s3-s4);
-momentOfInertiaZ = BParam2 * (-s1-s2+s3+s4);
+momentOfInertiaLX = BParam1 * (-s1+s2-s3+s4);
+momentOfInertiaLZ = BParam2 * (s1+s2-s3-s4);
 
-COPx = momentOfInertiaZ/ftotal;
-COPz = momentOfInertiaX/ftotal;
+COPLx = momentOfInertiaLZ/FLtotal;
+COPLz = momentOfInertiaLX/FLtotal;
 
-COPx = round(COPx,2);
-COPz = round(COPz,2);
+COPLx = round(COPLx,2);
+COPLz = round(COPLz,2);
 end
 
+function [COPRx,COPRz] = centerOfPressureRight(s1, s2, s3, s4, BParam1, BParam2)
+% Calculates center of pressre of the Right Platform.
+% Accepts data from four sensors and board parameters,  
+% returns center of pressure X and center of pressure Z
+FRtotal = s1 + s2 + s3 + s4; % Total force
+
+momentOfInertiaRX = BParam1 * (s1-s2+s3-s4);
+momentOfInertiaRZ = BParam2 * (-s1-s2+s3+s4);
+
+COPRx = momentOfInertiaRZ/FRtotal;
+COPRz = momentOfInertiaRX/FRtotal;
+
+COPRx = round(COPRx,2);
+COPRz = round(COPRz,2);
+end
 
 function [COGx,COGz] = centerOfGravity(s1, s2, s3, s4, s5, s6, s7, s8, ...
     COPLx, COPLz, COPRx, COPRz, offset)
