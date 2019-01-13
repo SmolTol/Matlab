@@ -1,56 +1,43 @@
-% Cleans workspace
-clc; clear all; close all;
-
-% Analyzes data from the WiiBoard
-% Gets: Weight data from WiiBoard
-%       Format: Eight unsigned ints from 0 to 150
-% Returns: Center of Gravity (COG)
-%          Center of Pressure (COP)
-%          Statistical information
-
-% TODO: expected input, expected output check
-% TODO: Time since script was started
-% TODO: Gets 8 points of data, all amount to player weight
-% Done: Return COP per each board of the platform, and total COP
-% Done: Return COG
-% Done: Save all points of data returned and gotten in Excel
-% Done: Create matrix of data returns 
-% TODO: For each data point return:
-%       V1) Mean
-%       V2) Median
-%       V3) Standard Deviation
-%       4) Percentile
-%       5) Plots
-%       6) Ellipse of Inertia
-% TODO: Create a Timer Function
+% bb1 = actxserver('WiiLab.WiiLAB');
+% bb1.Connect();
+% bb2 = actxserver('WiiLab.WiiLAB');
+% bb2.Connect();
+clearvars -except bb1 bb2
+OffsetL = bb1.GetBalanceBoardSensorState()/4;
+OffsetR = bb2.GetBalanceBoardSensorState()/4;
+i = 1;
+%while 1==1
+% sec = 60;
+% fs = 30;
+for j=1:1800;
+PlatformL(i,:) = (bb1.GetBalanceBoardSensorState()/4)-OffsetL;
+PlatformR(i,:) = (bb2.GetBalanceBoardSensorState()/4)-OffsetR;
+PlatformTime(i,:) = clock;
+i = i+1;
+pause(1/30);
+end
+%%
 %%%%%%%%%%%%%%%%%%
 % Board Parameters:
 % Distance measurements and offsets in milimeters
-%%%%%%%%%%%%%%%%%%
 halfOfBoardLength = 433/2;
 halfOfBoardWidth = 238/2;
 distanceBetweenPlatforms = 77;
-PlatformOffset = 157.5; % Distance from Total center to platform center (mm)
+PlatformOffset = 157.5;% Distance from Total center to platform center (mm)
 
-%%%%%%%%%%%%%%%%%%
-% Test parameters:
-% Mock data to be replaced with actual sensor
-% data when the connection works
-% line 12/41 excel
-%%%%%%%%%%%%%%%%%%
-
+for n = 1:length(PlatformTime)
 % Left platform sensors data points
-LPLT = 6;
-LPLB = 14.9;
-LPRT = 9.2;
-LPRB = 14.8;
+LPLT = PlatformL(n,4) ;
+LPLB = PlatformL(n,3) ;
+LPRT = PlatformL(n,2) ;
+LPRB = PlatformL(n,1) ;
 
 % Right platform sensors data points
-RPLT = 6.5;
-RPLB = 12.7;
-RPRT = 5.2;
-RPRB = 10.2;
-
+RPLT = PlatformR(n,1) ;
+RPLB = PlatformR(n,2) ;
+RPRT = PlatformR(n,3) ;
+RPRB = PlatformR(n,4) ;
+end %not sure if this is the right location
 %%%%%%%%%%%%%%%%%%
 % Do the math
 %%%%%%%%%%%%%%%%%%
@@ -61,10 +48,6 @@ RPRB = 10.2;
 % Center of pressure on Right Board
 [CoPRightX, CoPRightZ] = centerOfPressureRight(RPLT, RPLB, RPRT, RPRB, ...
     halfOfBoardLength, halfOfBoardWidth)
-
-% Center of pressure Total
-%[CoPTotalx, CoPTotalZ] = centerOfPressure(LPLT, LPLB, RPRT, RPRB, ...
-    %halfOfBoardLength, (2*halfOfBoardWidth + distanceBetweenPlatforms/2))
 
 % Center of gravity total
 [CoGx, CoGz] = centerOfGravity(LPRB, LPRT, LPLB, LPLT ,RPLT, RPLB, RPRT,...
@@ -78,27 +61,29 @@ vectorHeader = {'Time','LPLT','LPLB','LPRT','LPRB','RPLT','RPLB','RPRT','RPRB',.
 'COPLx','COPLz','COPRx','COPRz','COGx','COGz'};
 xlswrite('dataAnalyzerSheet.xlsx',vectorHeader,'A1:O1');
 
-vectorSider = {'Mean','Median','S.D'};
-xlswrite('dataAnalyzerSheet.xlsx',vectorSider(:),'I123:I125');
-
 vectorOfResults = [0, LPLT,LPLB,LPRT,LPRB,RPLT, RPLB, RPRT, RPRB,CoPLeftX,...
 CoPLeftZ,CoPRightX, CoPRightZ, CoGx, CoGz];
-xlswrite('dataAnalyzerSheet.xlsx',vectorOfResults,'A2:O2');
+xlswrite('dataAnalyzerSheet.xlsx',vectorOfResults,'A2:O1801');
 
-xlswrite('dataAnalyzerSheet.xlsx',1,'J3:O120');
+%xlswrite('dataAnalyzerSheet.xlsx',1,'J3:O120');
 
 winopen('dataAnalyzerSheet.xlsx')
 
 %%%%%%%%%%%%%%%%%%
 %Plotting
 %%%%%%%%%%%%%%%%%%
-dataFromColumns = xlsread("dataAnalyzerSheet.xlsx" , "J2:O121");
-COPLeftx = dataFromColumns(1:119,1);
-COPLeftz = dataFromColumns(1:119,2);
-COPRightx = dataFromColumns(1:119,3);
-COPRightz = dataFromColumns(1:119,4);
-COGravx = dataFromColumns(1:119,5);
-COGravz = dataFromColumns(1:119,6);
+dataFromColumns = xlsread("dataAnalyzerSheet.xlsx" , "J2:O1801");
+COPLeftx = dataFromColumns(1:1800,1);
+COPLeftz = dataFromColumns(1:1800,2);
+COPRightx = dataFromColumns(1:800,3);
+COPRightz = dataFromColumns(1:800,4);
+COGravityx = dataFromColumns(1:800,5);
+COGravityz = dataFromColumns(1:800,6);
+
+
+
+
+for n = 1:length(dataFromColumns)
 
 figure(1)
 plot(COPLeftx,COPLeftz, ':r')
@@ -125,7 +110,7 @@ ax.YTick = [-220:10:220];
 title('Center of Pressure Right')
 
 figure(3)
-plot(COGravx,COGravz, '-o')
+plot(COGravityx,COGravityz, '-o')
 xlabel('X [mm]');
 ylabel('Z [mm]');
 xlim([-242 242]);
@@ -205,3 +190,6 @@ COGz = zMomentTotal/platformsWeightTotal;
 COGx = round(COGx,2);
 COGz = round(COGz,2);
 end
+
+%bb1.Disconnect();
+%bb2.Disconnect();
