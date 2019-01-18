@@ -62,6 +62,7 @@ vectorHeader = {'Time','LPLT','LPLB','LPRT','LPRB','RPLT','RPLB','RPRT','RPRB',.
 xlswrite('dataAnalyzerSheet.xlsx',vectorHeader,'A1:O1');
 vectorSider = {'Mean','Median', 'S.D'};
 xlswrite('dataAnalyzerSheet.xlsx',vectorSider(:),'I1804:I1086');
+winopen('dataAnalyzerSheet.xlsx')
 
 vectorOfResults = [0, LPLT,LPLB,LPRT,LPRB,RPLT, RPLB, RPRT, RPRB,CoPLeftX,...
 CoPLeftZ,CoPRightX, CoPRightZ, CoGx, CoGz];

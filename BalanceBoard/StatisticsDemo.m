@@ -1,0 +1,223 @@
+clc; clear all; close all;
+
+%%% testing Statistics 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%MatrixOE1 = load('Proband1_OE.mat');
+%PlatformL(i,:) = (bb1.GetBalanceBoardSensorState()/4)-OffsetL;
+%PlatformR(i,:) = (bb2.GetBalanceBoardSensorState()/4)-OffsetR;
+%PlatformTime(i,:) = clock;
+% Board Parameters:
+% Distance measurements and offsets in milimeters
+%%%%%%
+MatrixOfData = load('Proband5_CE.mat');
+halfOfBoardLength = 433/2;
+halfOfBoardWidth = 238/2;
+distanceBetweenPlatforms = 77;
+PlatformOffset = 157.5;% Distance from Total center to platform center (mm)
+
+
+%%%%%%%%%%%%%%%%%%
+% Retrieve data for plotting
+%%%%%%%%%%%%%%%%%%
+
+for n = 1:length(MatrixOfData.PlatformL(:,1))
+% Left platform sensors data points
+LPLT(n) = MatrixOfData.PlatformL(n,4);
+LPLB(n) = MatrixOfData.PlatformL(n,3);
+LPRT(n) = MatrixOfData.PlatformL(n,2);
+LPRB(n) = MatrixOfData.PlatformL(n,1);
+
+% Right platform sensors data points
+RPLT(n) = MatrixOfData.PlatformR(n,1);
+RPLB(n) = MatrixOfData.PlatformR(n,2);
+RPRT(n) = MatrixOfData.PlatformR(n,3);
+RPRB(n)= MatrixOfData.PlatformR(n,4);
+end
+
+
+%%%%%%%%%%%%%%%%%%
+% Do the math
+%%%%%%%%%%%%%%%%%%
+
+% Set up vectors
+CoPLeftX = [];
+CoPLeftZ = [];
+CoPRightX = [];
+CoPRightZ = [];
+CoGx = [];
+CoGz = [];
+
+% Calculate center of pressure and center of gravity
+for m = 1:length(MatrixOfData.PlatformL(:,1))
+    
+% Center of pressure Left Board
+[CoPLeftX(m), CoPLeftZ(m)] = centerOfPressureLeft(LPRB(m), LPRT(m), LPLB(m),...
+LPLT(m),halfOfBoardLength, halfOfBoardWidth);
+
+% Center of pressure on Right Board
+[CoPRightX(m), CoPRightZ(m)] = centerOfPressureRight(RPLT(m), RPLB(m),RPRT(m),...
+RPRB(m),halfOfBoardLength, halfOfBoardWidth);
+
+% Center of gravity total
+[CoGx(m), CoGz(m)] = centerOfGravity(LPRB(m), LPRT(m), LPLB(m), LPLT(m),...
+RPLT(m), RPLB(m), RPRT(m),RPRB(m), CoPLeftX(m), CoPLeftZ(m), ...
+CoPRightX(m), CoPRightZ(m), PlatformOffset);
+
+% Set up matrix of results
+MatrixOfResults(m,:) = [0, LPLT(m),LPLB(m),LPRT(m),LPRB(m),RPLT(m),...
+RPLB(m), RPRT(m), RPRB(m), CoPLeftX(m), CoPLeftZ(m), CoPRightX(m),...
+CoPRightZ(m),CoGx(m), CoGz(m)];
+
+end
+
+%Saving the needed information from Excel to Matlab matrix
+% dataFromColumns = xlsread('dataAnalyzerSheet.xlsx' , 'J2:O1801');
+% COPLeftx = dataFromColumns(1:1800,1);
+% COPLeftz = dataFromColumns(1:1800,2);
+% COPRightx = dataFromColumns(1:800,3);
+% COPRightz = dataFromColumns(1:800,4);
+% COGravityx = dataFromColumns(1:800,5);
+% COGravityz = dataFromColumns(1:800,6);
+
+% Use the matrix to calculate statistical data
+for n = 10:length(MatrixOfResults(1,:))
+   MeanOfColumns(n-9) = mean(MatrixOfResults(:,n));
+   MedianOfColumns(n-9) = median(MatrixOfResults(:,n));
+   StandardDeviarionOfColumns(n-9) = std(MatrixOfResults(:,n));
+end 
+
+
+%%%%%%%%%%%%%%%%%%
+% Write data in Excel
+%%%%%%%%%%%%%%%%%%
+vectorHeader = {'Time','LPLT','LPLB','LPRT','LPRB','RPLT','RPLB','RPRT','RPRB',...
+'COPLx','COPLz','COPRx','COPRz','COGx','COGz'};
+xlswrite('dataAnalyzerSheet.xlsx',vectorHeader,'A1:O1');
+vectorSider = {'Mean','Median','S.D'};
+xlswrite('dataAnalyzerSheet.xlsx',vectorSider(:),'I1804:I1806');
+xlswrite('dataAnalyzerSheet.xlsx',MatrixOfResults,'A2:O1801');
+xlswrite('dataAnalyzerSheet.xlsx',MeanOfColumns,'J1804:O1804');
+xlswrite('dataAnalyzerSheet.xlsx',MedianOfColumns,'J1805:O1805');
+xlswrite('dataAnalyzerSheet.xlsx',StandardDeviarionOfColumns,'J1806:O1806');
+
+winopen('dataAnalyzerSheet.xlsx')
+
+
+%%%%%%%%%%%%%%%%%%
+%Plotting
+%%%%%%%%%%%%%%%%%%
+% figure(1)
+% ax = gca;
+% plot(CoPLeftX,CoPLeftZ, 'xb')
+% ax.XAxisLocation = 'origin';
+% ax.YAxisLocation = 'origin';
+% xlabel('X [mm]');
+% ylabel('Z [mm]');
+% %xlim([-15 15]);
+% %ylim([-25 25]);
+% grid on
+% grid minor
+% ax.XTick = [-20:1:20];
+% ax.YTick = [-25:1:25];
+% 
+% title('Center of Pressure Left')
+% 
+% figure(2)
+% ax = gca;
+% plot(CoPRightX,CoPRightZ, 'xg' )
+% ax.XAxisLocation = 'origin';
+% ax.YAxisLocation = 'origin';
+% xlabel('X [mm]');
+% ylabel('Z [mm]');
+% %xlim([-15 15]);
+% %ylim([-25 25]);
+% grid on
+% grid minor
+% ax.XTick = [-20:1:20];
+% ax.YTick = [-25:1:25];
+% 
+% title('Center of Pressure Right')
+
+figure
+ax = gca;
+plot(CoPLeftX - PlatformOffset,CoPLeftZ,'xb',CoPRightX + PlatformOffset,CoPRightZ,'xg',CoGx,CoGz,'xr')
+legend('CoP Left','CoP Right','CoG')
+ax.XAxisLocation = 'origin';
+ax.YAxisLocation = 'origin';
+xlabel('X [mm]');
+ylabel('Z [mm]');
+%xlim([-30 30]);
+%ylim([-30 30]);
+grid on
+grid minor
+%ax.XTick = [-30:1:30];
+%ax.YTick = [-35:1:35];
+
+%title('Center of Gravity')
+
+
+%%%%%%%%%%%%%%%%%%
+% Function definitions
+%%%%%%%%%%%%%%%%%%
+function [COPLx,COPLz] = centerOfPressureLeft(s1, s2, s3, s4, BParam1, BParam2)
+% Calculates center of pressre of the Left Platform.
+% Accepts data from four sensors and board parameters,  
+% returns center of pressure X and center of pressure Z
+FLtotal = s1 + s2 + s3 + s4; % Total force
+
+momentOfInertiaLX = BParam1 * (-s1+s2-s3+s4);
+momentOfInertiaLZ = BParam2 * (s1+s2-s3-s4);
+
+COPLx = momentOfInertiaLZ/FLtotal;
+COPLz = momentOfInertiaLX/FLtotal;
+
+COPLx = round(COPLx,2);
+COPLz = round(COPLz,2);
+end
+
+function [COPRx,COPRz] = centerOfPressureRight(s1, s2, s3, s4, BParam1, BParam2)
+% Calculates center of pressre of the Right Platform.
+% Accepts data from four sensors and board parameters,  
+% returns center of pressure X and center of pressure Z
+FRtotal = s1 + s2 + s3 + s4; % Total force
+
+momentOfInertiaRX = BParam1 * (s1-s2+s3-s4);
+momentOfInertiaRZ = BParam2 * (-s1-s2+s3+s4);
+
+COPRx = momentOfInertiaRZ/FRtotal;
+COPRz = momentOfInertiaRX/FRtotal;
+
+COPRx = round(COPRx,2);
+COPRz = round(COPRz,2);
+end
+
+function [COGx,COGz] = centerOfGravity(s1, s2, s3, s4, s5, s6, s7, s8, ...
+    COPLx, COPLz, COPRx, COPRz, offset)
+% calculates coordinates of center of gravity
+% Accepts info from sensors and COP coordinates
+% Returns center of gravity X and center of gravity Z
+
+% Offsets
+xOffsetCOPL = COPLx - offset;
+xOffsetCOPR = COPRx + offset;
+
+% Weights from sensors
+platformWeightLeft = s1 + s2 + s3 + s4;
+platformWeightRight = s5 + s6 + s7 + s8;
+platformsWeightTotal = platformWeightLeft + platformWeightRight;
+
+% Moments of Inertia
+xMomentLeft = platformWeightLeft * xOffsetCOPL;
+xMomentRight = platformWeightRight * xOffsetCOPR;
+zMomentLeft = platformWeightLeft * COPLz;
+zMomentRight = platformWeightRight * COPRz;
+xMomentTotal = xMomentLeft + xMomentRight;
+zMomentTotal = zMomentLeft + zMomentRight;
+
+% Center of gravity
+COGx = xMomentTotal/platformsWeightTotal;
+COGz = zMomentTotal/platformsWeightTotal;
+
+COGx = round(COGx,2);
+COGz = round(COGz,2);
+end

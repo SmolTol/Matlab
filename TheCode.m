@@ -40,16 +40,16 @@ PlatformOffset = 157.5; % Distance from Total center to platform center (mm)
 %%%%%%%%%%%%%%%%%%
 
 % Left platform sensors data points
-LPLT = 6;
-LPLB = 14.9;
-LPRT = 9.2;
-LPRB = 14.8;
+LPLT = 4.854;
+LPLB = 6.181;
+LPRT = 5.057;
+LPRB = 6.338;
 
 % Right platform sensors data points
-RPLT = 6.5;
-RPLB = 12.7;
-RPRT = 5.2;
-RPRB = 10.2;
+RPLT = 4.634;
+RPLB = 6.729;
+RPRT = 5.539;
+RPRB = 7.921;
 
 %%%%%%%%%%%%%%%%%%
 % Do the math
@@ -76,18 +76,18 @@ RPRB = 10.2;
 
 vectorHeader = {'Time','LPLT','LPLB','LPRT','LPRB','RPLT','RPLB','RPRT','RPRB',...
 'COPLx','COPLz','COPRx','COPRz','COGx','COGz'};
-xlswrite('dataAnalyzerSheet.xlsx',vectorHeader,'A1:O1');
+xlswrite('dataAnalyzerSheep.xlsx',vectorHeader,'A1:O1');
 
 vectorSider = {'Mean','Median','S.D'};
-xlswrite('dataAnalyzerSheet.xlsx',vectorSider(:),'I123:I125');
-
+xlswrite('dataAnalyzerSheep.xlsx',vectorSider(:),'I123:I125');
+winopen('dataAnalyzerSheep.xlsx')
 vectorOfResults = [0, LPLT,LPLB,LPRT,LPRB,RPLT, RPLB, RPRT, RPRB,CoPLeftX,...
 CoPLeftZ,CoPRightX, CoPRightZ, CoGx, CoGz];
-xlswrite('dataAnalyzerSheet.xlsx',vectorOfResults,'A2:O2');
+xlswrite('dataAnalyzerSheep.xlsx',vectorOfResults,'A2:O2');
 
-xlswrite('dataAnalyzerSheet.xlsx',1,'J3:O120');
+xlswrite('dataAnalyzerSheep.xlsx',1,'J3:O120');
 
-winopen('dataAnalyzerSheet.xlsx')
+winopen('dataAnalyzerSheep.xlsx')
 
 %%%%%%%%%%%%%%%%%%
 %Plotting
@@ -111,6 +111,8 @@ grid minor
 ax.XTick = [-120:10:120];
 ax.YTick = [-220:10:220];
 title('Center of Pressure Left')
+
+%Perc1 = prctile(COPLeftx,[25 50 75],1)
 
 figure(2)
 plot(COPRightx,COPRightz, '--xg' )
